@@ -4,6 +4,7 @@ import os
 from functools import partial
 
 import mindspore as ms
+import mindspore.common.dtype as mstype
 
 from mindyolo.data import COCODataset, create_loader
 from mindyolo.models import create_loss, create_model
@@ -253,6 +254,7 @@ def train(args):
         test_fn = None
 
     # Create Trainer
+    network.to(mstype.bf16)
     network.set_train(True)
     optimizer.set_train(True)
     model_name = os.path.basename(args.config)[:-5]  # delete ".yaml"

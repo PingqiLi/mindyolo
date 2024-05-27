@@ -36,8 +36,9 @@ def get_loss_scaler(ms_loss_scaler="static", scale_value=1024, scale_factor=2, s
 
 def create_train_step_fn(task, network, loss_fn, optimizer, loss_ratio, scaler, reducer,
                          ema=None, overflow_still_update=False, ms_jit=False, clip_grad=False, clip_grad_value=10.):
-    from mindspore.amp import all_finite
+    from mindspore.amp import all_finite, auto_mixed_precision
 
+    network = auto_mixed_precision(network, amp_level="O3", dtype=ms.dtype.bfloat16)
     use_ema = True if ema else False
 
     if task == "detect":

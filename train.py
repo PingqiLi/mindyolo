@@ -4,6 +4,7 @@ import os
 from functools import partial
 
 import mindspore as ms
+from mindspore import JitConfig
 
 from mindyolo.data import COCODataset, create_loader
 from mindyolo.models import create_loss, create_model
@@ -83,6 +84,7 @@ def get_parser_train(parents=None):
                         help="ModelArts: local device path to dataset folder")
     parser.add_argument("--ckpt_dir", type=str, default="/cache/pretrain_ckpt/",
                         help="ModelArts: local device path to checkpoint folder")
+    parser.add_argument("--kbk", type=ast.literal_eval, default=False, help="enable kbk mode")
     return parser
 
 
@@ -95,6 +97,11 @@ def train(args):
     logger.info(f"parse_args:\n{args}")
     logger.info("Please check the above information for the configurations")
 
+    if args.kbk:
+        jitconfig = JitConfig("O0")
+    else:
+        jitconfig = JitConfig("")
+
     # Create Network
     args.network.recompute = args.recompute
     args.network.recompute_layers = args.recompute_layers
@@ -104,6 +111,7 @@ def train(args):
         num_classes=args.data.nc,
         sync_bn=args.sync_bn,
     )
+    network = network.set_jit_congfig(jitconfig)
 
     if args.ema:
         ema_network = create_model(
@@ -119,6 +127,7 @@ def train(args):
     ms.amp.auto_mixed_precision(network, amp_level=args.ms_amp_level)
     if ema:
         ms.amp.auto_mixed_precision(ema.ema, amp_level=args.ms_amp_level)
+        ema.set_jit_config(jitconfig)
 
     # Create Dataloaders
     transforms = args.data.train_transforms

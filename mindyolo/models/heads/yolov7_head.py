@@ -3,7 +3,7 @@ import numpy as np
 
 import mindspore as ms
 import mindspore.numpy as mnp
-from mindspore import Parameter, Tensor, nn, ops
+from mindspore import Parameter, Tensor, nn, ops, mint
 
 from mindyolo.utils import logger
 from ..layers.implicit import ImplicitA, ImplicitM
@@ -46,7 +46,7 @@ class YOLOv7Head(nn.Cell):
         )
 
         self.m = nn.CellList(
-            [nn.Conv2d(x, self.no * self.na, 1, pad_mode="valid", has_bias=True) for x in ch]
+            [nn.extend.Conv2d(x, self.no * self.na, 1, pad_mode="valid", has_bias=True) for x in ch]
         )  # output conv
 
         self.ia = nn.CellList([ImplicitA(x) for x in ch])
@@ -87,7 +87,7 @@ class YOLOv7Head(nn.Cell):
     def _make_grid(nx=20, ny=20, dtype=ms.float32):
         # FIXME: Not supported on a specific model of machine
         xv, yv = meshgrid((mnp.arange(nx), mnp.arange(ny)))
-        return ops.cast(ops.stack((xv, yv), 2).view((1, 1, ny, nx, 2)), dtype)
+        return ops.cast(mint.stack((xv, yv), 2).view((1, 1, ny, nx, 2)), dtype)
 
     @staticmethod
     def _check_anchor_order(anchors, anchor_grid, stride):
@@ -192,7 +192,7 @@ class YOLOv7AuxHead(nn.Cell):
     @staticmethod
     def _make_grid(nx=20, ny=20, dtype=ms.float32):
         xv, yv = meshgrid((mnp.arange(nx), mnp.arange(ny)))
-        return ops.stack((xv, yv), 2).view((1, 1, ny, nx, 2)).astype(dtype)
+        return mint.stack((xv, yv), 2).view((1, 1, ny, nx, 2)).astype(dtype)
 
     @staticmethod
     def _check_anchor_order(anchors, anchor_grid, stride):

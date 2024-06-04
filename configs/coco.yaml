@@ -3,8 +3,8 @@
 data:
   dataset_name: coco
 
-  train_set: /home/workspace/mindspore_dataset/yolov7_coco2017/val2017.txt  # 118287 images
-  val_set: /home/workspace/mindspore_dataset/yolov7_coco2017/val2017.txt  # 5000 images
+  train_set: /home/lpq/coco2017labels-segements/val2017.txt  # 118287 images
+  val_set: /home/lpq/coco2017labels-segements/val2017.txt  # 5000 images
   test_set: ./coco/test-dev2017.txt  # 20288 of 40670 images, submit to https://competitions.codalab.org/competitions/20794
 
   nc: 80

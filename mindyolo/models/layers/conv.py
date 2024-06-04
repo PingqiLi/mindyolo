@@ -41,7 +41,7 @@ class ConvNormAct(nn.Cell):
         self, c1, c2, k=1, s=1, p=None, g=1, d=1, act=True, momentum=0.97, eps=1e-3, sync_bn=False
     ):  # ch_in, ch_out, kernel, stride, padding, groups
         super(ConvNormAct, self).__init__()
-        self.conv = nn.Conv2d(
+        self.conv = nn.extend.Conv2d(
             c1, c2, k, s, pad_mode="pad", padding=autopad(k, p, d), group=g, dilation=d, has_bias=False
         )
 

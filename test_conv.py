@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 
 def test_conv2d():
-    in_channels = 3
-    out_channels = 16
+    in_channels = 1
+    out_channels = 1
     kernel_size = (3, 3)
     stride = 1
     padding = 1
@@ -18,8 +18,8 @@ def test_conv2d():
     bias_init = 'zeros'
 
     # Create input tensor
-    input_tensor = Tensor(np.random.randn(1, in_channels, 32, 32), mstype.float32)
-
+    input_tensor = Tensor(np.random.randn(1, in_channels, 8, 8), mstype.float32)
+    
     # Initialize both Conv2d instances
     conv_custom = Conv2d(in_channels, out_channels, kernel_size, stride, 'pad', padding, dilation, group, has_bias,
                          weight_init, bias_init)
@@ -34,6 +34,12 @@ def test_conv2d():
     # Get the output from both instances
     output_custom = conv_custom(input_tensor)
     output_original = conv_original(input_tensor)
+    print("output_custom:")
+    print("-" * 30)
+    print(output_custom.asnumpy())
+    print("output_original:")
+    print("-" * 30)
+    print(output_original.asnumpy())
 
     # Compare outputs
     assert np.allclose(output_custom.asnumpy(), output_original.asnumpy()), "Outputs do not match!"

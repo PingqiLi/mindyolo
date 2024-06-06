@@ -4,6 +4,7 @@ import os
 from functools import partial
 
 import mindspore as ms
+from mindspore import context
 
 from mindyolo.data import COCODataset, create_loader
 from mindyolo.models import create_loss, create_model
@@ -88,6 +89,7 @@ def get_parser_train(parents=None):
 
 def train(args):
     # Set Default
+    context.set_context(pynative_synchronize=True)
     set_seed(args.seed)
     set_default(args)
     main_device = args.rank % args.rank_size == 0

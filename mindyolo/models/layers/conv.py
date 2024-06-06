@@ -11,7 +11,12 @@ class Conv2d(nn.Cell):
         super(Conv2d, self).__init__()
         self.in_channels = in_channels
         self.out_channels = out_channels
-        self.kernel_size = kernel_size
+
+        if isinstance(kernel_size, int):
+            self.kernel_size = (kernel_size, kernel_size)
+        elif isinstance(kernel_size, tuple):
+            self.kernel_size = kernel_size
+
         self.stride = stride
         self.pad_mode = pad_mode
         self.padding = padding
@@ -23,26 +28,25 @@ class Conv2d(nn.Cell):
 
         # Initialize weights and bias
         self.weight = Parameter(
-            init.initializer(weight_init, [out_channels, in_channels // group, *kernel_size]), name="weight")
+            init.initializer(weight_init, [out_channels, in_channels // group, *self.kernel_size]), name="weight")
         if has_bias:
             self.bias = Parameter(init.initializer(bias_init, [out_channels]), name="bias")
         else:
             self.bias = None
 
     def construct(self, x):
-        if self.pad_mode == 'same':
-            padding = self.padding
-        elif self.pad_mode == 'valid':
-            padding = 0
+        if self.pad_mode == 'same' or self.padding == 'valid':
+            return ops.extend.conv2d(x, self.weight, self.bias, self.stride, self.pad_mode, self.dilation, self.group)
         elif self.pad_mode == 'pad':
-            if self.padding < 0:
-                raise ValueError("Padding size must be greater than or equal to 0 for pad mode.")
-            x = ops.pad_ext(x, ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)), mode='constant')
-            padding = 0
+            if isinstance(self.padding, int):
+                return ops.extend.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.group)
+            else: #tuple/list
+                x = ops.pad_ext(x, self.padding)
+                return ops.extend.conv2d(x, self.weight, self.bias, self.stride, 0, self.dilation, self.group)
         else:
             raise ValueError(f"Unsupported pad_mode: {self.pad_mode}")
 
-        return ops.extend.conv2d(x, self.weight, self.bias, self.stride, padding, self.dilation, self.group)
+
 
 
 class ConvNormAct(nn.Cell):
@@ -93,7 +97,13 @@ class ConvNormAct(nn.Cell):
         self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Cell) else Identity)
 
     def construct(self, x):
-        return self.act(self.bn(self.conv(x)))
+        print("-"*30)
+        print("ConvNormAct.construct()")
+        print("Shape of input: ", x.shape)
+        output = self.act(self.bn(self.conv(x)))
+        print("Shape of output: ", output.shape)
+        print("-" * 30)
+        return output
 
 
 class RepConv(nn.Cell):

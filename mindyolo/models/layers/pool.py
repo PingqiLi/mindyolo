@@ -34,10 +34,10 @@ class MaxPool2d(nn.Cell):
     def __init__(self, kernel_size, stride, padding=0):
         super(MaxPool2d, self).__init__()
         assert isinstance(padding, int)
-        self.padding = padding
+        self.padding = (0, 0, 0, 0, padding, padding, padding, padding)
         self.pool = nn.extend.MaxPool2d(kernel_size=kernel_size, stride=stride)
 
     def construct(self, x):
-        x = ops.pad_ext(x, padding=self.padding)
+        x = ops.pad_ext(x, self.padding)
         x = self.pool(x)
         return x

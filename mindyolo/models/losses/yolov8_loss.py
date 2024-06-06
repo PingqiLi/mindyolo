@@ -1,6 +1,5 @@
 import mindspore as ms
 import mindspore.numpy as mnp
-
 from mindspore import Tensor, nn, ops
 
 from mindyolo.models.registry import register_model

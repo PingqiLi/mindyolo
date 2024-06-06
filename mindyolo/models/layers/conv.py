@@ -1,7 +1,48 @@
-from mindspore import nn, ops
+from mindspore import nn, ops, Parameter
+import mindspore.common.initializer as init
 
 from .common import Identity
 from .utils import autopad
+
+
+class Conv2d(nn.Cell):
+    def __init__(self, in_channels, out_channels, kernel_size, stride=1, pad_mode='same', padding=0, dilation=1,
+                 group=1, has_bias=False, weight_init='normal', bias_init='zeros', data_format='NCHW'):
+        super(Conv2d, self).__init__()
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+        self.kernel_size = kernel_size
+        self.stride = stride
+        self.pad_mode = pad_mode
+        self.padding = padding
+        self.dilation = dilation
+        self.group = group
+        self.has_bias = has_bias
+        self.weight_init = weight_init
+        self.bias_init = bias_init
+
+        # Initialize weights and bias
+        self.weight = Parameter(
+            init.initializer(weight_init, [out_channels, in_channels // group, *kernel_size]), name="weight")
+        if has_bias:
+            self.bias = Parameter(init.initializer(bias_init, [out_channels]), name="bias")
+        else:
+            self.bias = None
+
+    def construct(self, x):
+        if self.pad_mode == 'same':
+            padding = self.padding
+        elif self.pad_mode == 'valid':
+            padding = 0
+        elif self.pad_mode == 'pad':
+            if self.padding < 0:
+                raise ValueError("Padding size must be greater than or equal to 0 for pad mode.")
+            x = ops.pad_ext(x, ((0, 0), (0, 0), (self.padding, self.padding), (self.padding, self.padding)), mode='constant')
+            padding = 0
+        else:
+            raise ValueError(f"Unsupported pad_mode: {self.pad_mode}")
+
+        return ops.extend.conv2d(x, self.weight, self.bias, self.stride, padding, self.dilation, self.group)
 
 
 class ConvNormAct(nn.Cell):
@@ -41,7 +82,7 @@ class ConvNormAct(nn.Cell):
         self, c1, c2, k=1, s=1, p=None, g=1, d=1, act=True, momentum=0.97, eps=1e-3, sync_bn=False
     ):  # ch_in, ch_out, kernel, stride, padding, groups
         super(ConvNormAct, self).__init__()
-        self.conv = nn.extend.Conv2d(
+        self.conv = Conv2d(
             c1, c2, k, s, pad_mode="pad", padding=autopad(k, p, d), group=g, dilation=d, has_bias=False
         )
 

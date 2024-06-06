@@ -5,6 +5,22 @@ from .common import Identity
 from .utils import autopad
 
 
+def calculate_same_padding(input_size, kernel_size, stride=1):
+    if isinstance(kernel_size, int):
+        kernel_size = (kernel_size, kernel_size)
+    if isinstance(stride, int):
+        stride = (stride, stride)
+
+    paddings = []
+    for i in range(len(input_size)):
+        total_padding = ((input_size[i] - 1) * stride[i] + kernel_size[i] - input_size[i])
+        padding_left = total_padding // 2
+        padding_right = total_padding - padding_left
+        paddings.append((padding_left, padding_right))
+
+    return tuple(paddings)
+
+
 class Conv2d(nn.Cell):
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, pad_mode='same', padding=0, dilation=1,
                  group=1, has_bias=False, weight_init='normal', bias_init='zeros', data_format='NCHW'):
@@ -39,7 +55,9 @@ class Conv2d(nn.Cell):
             return ops.extend.conv2d(x, self.weight, self.bias, self.stride, self.pad_mode, self.dilation, self.group)
         elif self.pad_mode == 'pad':
             if isinstance(self.padding, int):
-                return ops.extend.conv2d(x, self.weight, self.bias, self.stride, self.padding, self.dilation, self.group)
+                padding = calculate_same_padding(self.in_channels, self.kernel_size, self.stride)
+                x = ops.pad(x, padding)
+                return ops.extend.conv2d(x, self.weight, self.bias, self.stride, 0, self.dilation, self.group)
             else: #tuple/list
                 x = ops.pad_ext(x, self.padding)
                 return ops.extend.conv2d(x, self.weight, self.bias, self.stride, 0, self.dilation, self.group)

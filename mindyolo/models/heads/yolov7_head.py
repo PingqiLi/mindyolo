@@ -8,7 +8,6 @@ from mindspore import Parameter, Tensor, nn, ops, mint
 from mindyolo.utils import logger
 from ..layers.implicit import ImplicitA, ImplicitM
 from ..layers.utils import meshgrid
-from ..layers.conv import Conv2d
 
 
 class YOLOv7Head(nn.Cell):
@@ -46,7 +45,7 @@ class YOLOv7Head(nn.Cell):
             requires_grad=False,
         )
         self.m = nn.CellList(
-            [Conv2d(x, self.no * self.na, 1, pad_mode="valid", has_bias=True) for x in ch]
+            [nn.Conv2d(x, self.no * self.na, 1, pad_mode="valid", has_bias=True) for x in ch]
         )  # output conv
 
         self.ia = nn.CellList([ImplicitA(x) for x in ch])

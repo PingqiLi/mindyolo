@@ -208,8 +208,8 @@ class YOLOv7Loss(nn.Cell):
 
         # (bs, gt_max, 80)
         gt_cls_per_image = ops.extend.one_hot(
-            indices=ops.cast(this_target[:, :, 1], ms.int32),
-            depth=self.nc
+            ops.cast(this_target[:, :, 1], ms.int32),
+            self.nc
         )
         # (bs, gt_max, nl*5*na*gt_max, 80)
         gt_cls_per_image = ops.tile(
@@ -606,8 +606,8 @@ class YOLOv7AuxLoss(nn.Cell):
 
         # (bs, gt_max, 80)
         gt_cls_per_image = ops.extend.one_hot(
-            indices=ops.cast(this_target[:, :, 1], ms.int32),
-            depth=self.nc
+            ops.cast(this_target[:, :, 1], ms.int32),
+            self.nc
         )
         # (bs, gt_max, nl*5*na*gt_max, 80)
         gt_cls_per_image = ops.tile(
@@ -763,8 +763,8 @@ class YOLOv7AuxLoss(nn.Cell):
 
         # (bs, gt_max, 80)
         gt_cls_per_image = ops.extend.one_hot(
-            indices=ops.cast(this_target[:, :, 1], ms.int32),
-            depth=self.nc
+            ops.cast(this_target[:, :, 1], ms.int32),
+            self.nc
         )
         # (bs, gt_max, nl*5*na*gt_max, 80)
         gt_cls_per_image = ops.tile(

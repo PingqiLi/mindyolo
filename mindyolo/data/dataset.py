@@ -115,7 +115,7 @@ class COCODataset:
             raise Exception(f"Error loading data from {self.path}: {e}\n")
 
         # Check cache
-        cache_path = Path(f"/home/lpq/mindyolo/train2017.cache")
+        cache_path = Path(f"/data/lpq/mindyolo/train2017.cache")
         self.label_files = self._img2label_paths(self.img_files)  # labels
         # cache_path = (p if p.is_file() else Path(self.label_files[0]).parent).with_suffix(".cache.npy")  # cached labels
         if cache_path.is_file():

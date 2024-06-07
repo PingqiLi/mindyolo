@@ -51,12 +51,12 @@ class Conv2d(nn.Cell):
             self.bias = None
 
     def construct(self, x):
-        if self.pad_mode == 'same' or self.padding == 'valid':
+        if self.pad_mode == 'same' or self.pad_mode == 'valid':
             return ops.extend.conv2d(x, self.weight, self.bias, self.stride, self.pad_mode, self.dilation, self.group)
         elif self.pad_mode == 'pad':
             if isinstance(self.padding, int):
-                padding = calculate_same_padding(self.in_channels, self.kernel_size, self.stride)
-                x = ops.pad(x, padding)
+                padding = (self.padding, self.padding, self.padding, self.padding)
+                x = ops.pad_ext(x, padding)
                 return ops.extend.conv2d(x, self.weight, self.bias, self.stride, 0, self.dilation, self.group)
             else: #tuple/list
                 x = ops.pad_ext(x, self.padding)
@@ -115,12 +115,7 @@ class ConvNormAct(nn.Cell):
         self.act = nn.SiLU() if act is True else (act if isinstance(act, nn.Cell) else Identity)
 
     def construct(self, x):
-        print("-"*30)
-        print("ConvNormAct.construct()")
-        print("Shape of input: ", x.shape)
         output = self.act(self.bn(self.conv(x)))
-        print("Shape of output: ", output.shape)
-        print("-" * 30)
         return output
 
 

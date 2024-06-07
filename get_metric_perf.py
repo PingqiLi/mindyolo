@@ -4,7 +4,7 @@ import argparse
 
 def extract_step_times(file_path):
     # Define the regex pattern to capture the step times
-    pattern = r"step time:\s*(\d+\.\d+)ms"
+    pattern = r"step time:\s*(\d+\.\d+)\s*ms"
 
     step_times = []
 
@@ -15,7 +15,7 @@ def extract_step_times(file_path):
             if match:
                 step_times.append(float(match.group(1)))
 
-    return step_times
+    return step_times[1:]
 
 
 def calculate_average_time(step_times):

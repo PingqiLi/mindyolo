@@ -2,6 +2,7 @@ import numpy as np
 
 import mindspore as ms
 import mindspore.numpy as mnp
+import mindspore.mint as mint
 from mindspore import Parameter, Tensor, nn, ops
 
 from mindyolo.models.registry import register_model
@@ -156,7 +157,7 @@ class YOLOv7Loss(nn.Cell):
             _this_indices *= _this_mask[None, :]
             _this_anch *= _this_mask[:, None]
 
-            b, a, gj, gi = ops.split(_this_indices, split_size_or_sections=1, axis=0)
+            b, a, gj, gi = mint.split(_this_indices, split_size_or_sections=1, axis=0)
             b, a, gj, gi = b.view(-1), a.view(-1), gj.view(-1), gi.view(-1)
 
             fg_pred = pi[b, a, gj, gi]
@@ -206,11 +207,9 @@ class YOLOv7Loss(nn.Cell):
         dynamic_ks = ops.cast(v.sum(-1).clip(1, 10), ms.int32)  # (bs, gt_max)
 
         # (bs, gt_max, 80)
-        gt_cls_per_image = ops.one_hot(
-            indices=ops.cast(this_target[:, :, 1], ms.int32),
-            depth=self.nc,
-            on_value=ops.ones(1, p_cls.dtype),
-            off_value=ops.zeros(1, p_cls.dtype),
+        gt_cls_per_image = ops.extend.one_hot(
+            ops.cast(this_target[:, :, 1], ms.int32),
+            self.nc
         )
         # (bs, gt_max, nl*5*na*gt_max, 80)
         gt_cls_per_image = ops.tile(
@@ -245,8 +244,8 @@ class YOLOv7Loss(nn.Cell):
 
         # delete reduplicate match label, one anchor only match one gt
         cost_argmin = mnp.argmin(cost, axis=1)  # (bs, nl*5*na*gt_max)
-        anchor_matching_gt_mask = ops.one_hot(
-            cost_argmin, n_gt_max, ops.ones(1, ms.float16), ops.zeros(1, ms.float16), axis=-1
+        anchor_matching_gt_mask = ops.extend.one_hot(
+            cost_argmin, n_gt_max
         ).transpose(
             0, 2, 1
         )  # (bs, gt_max, nl*5*na*gt_max)
@@ -555,7 +554,7 @@ class YOLOv7AuxLoss(nn.Cell):
             _this_indices *= _this_mask[None, :]
             _this_anch *= _this_mask[:, None]
 
-            b, a, gj, gi = ops.split(_this_indices, split_size_or_sections=1, axis=0)
+            b, a, gj, gi = mint.split(_this_indices, split_size_or_sections=1, axis=0)
             b, a, gj, gi = b.view(-1), a.view(-1), gj.view(-1), gi.view(-1)
 
             fg_pred = pi[b, a, gj, gi]
@@ -606,11 +605,9 @@ class YOLOv7AuxLoss(nn.Cell):
         dynamic_ks = ops.cast(v.sum(-1).clip(1, 20), ms.int32)  # (bs, gt_max)
 
         # (bs, gt_max, 80)
-        gt_cls_per_image = ops.one_hot(
-            indices=ops.cast(this_target[:, :, 1], ms.int32),
-            depth=self.nc,
-            on_value=ops.ones(1, p_cls.dtype),
-            off_value=ops.zeros(1, p_cls.dtype),
+        gt_cls_per_image = ops.extend.one_hot(
+            ops.cast(this_target[:, :, 1], ms.int32),
+            self.nc
         )
         # (bs, gt_max, nl*5*na*gt_max, 80)
         gt_cls_per_image = ops.tile(
@@ -645,8 +642,8 @@ class YOLOv7AuxLoss(nn.Cell):
 
         # delete reduplicate match label, one anchor only match one gt
         cost_argmin = mnp.argmin(cost, axis=1)  # (bs, nl*5*na*gt_max)
-        anchor_matching_gt_mask = ops.one_hot(
-            cost_argmin, n_gt_max, ops.ones(1, ms.float16), ops.zeros(1, ms.float16), axis=-1
+        anchor_matching_gt_mask = ops.extend.one_hot(
+            cost_argmin, n_gt_max
         ).transpose(
             0, 2, 1
         )  # (bs, gt_max, nl*5*na*gt_max)
@@ -714,7 +711,7 @@ class YOLOv7AuxLoss(nn.Cell):
             _this_indices *= _this_mask[None, :]
             _this_anch *= _this_mask[:, None]
 
-            b, a, gj, gi = ops.split(_this_indices, split_size_or_sections=1, axis=0)
+            b, a, gj, gi = mint.split(_this_indices, split_size_or_sections=1, axis=0)
             b, a, gj, gi = b.view(-1), a.view(-1), gj.view(-1), gi.view(-1)
 
             fg_pred = pi[b, a, gj, gi]
@@ -765,11 +762,9 @@ class YOLOv7AuxLoss(nn.Cell):
         dynamic_ks = ops.cast(v.sum(-1).clip(1, 20), ms.int32)  # (bs, gt_max)
 
         # (bs, gt_max, 80)
-        gt_cls_per_image = ops.one_hot(
-            indices=ops.cast(this_target[:, :, 1], ms.int32),
-            depth=self.nc,
-            on_value=ops.ones(1, p_cls.dtype),
-            off_value=ops.zeros(1, p_cls.dtype),
+        gt_cls_per_image = ops.extend.one_hot(
+            ops.cast(this_target[:, :, 1], ms.int32),
+            self.nc
         )
         # (bs, gt_max, nl*5*na*gt_max, 80)
         gt_cls_per_image = ops.tile(
@@ -804,8 +799,8 @@ class YOLOv7AuxLoss(nn.Cell):
 
         # delete reduplicate match label, one anchor only match one gt
         cost_argmin = mnp.argmin(cost, axis=1)  # (bs, nl*5*na*gt_max)
-        anchor_matching_gt_mask = ops.one_hot(
-            cost_argmin, n_gt_max, ops.ones(1, ms.float16), ops.zeros(1, ms.float16), axis=-1
+        anchor_matching_gt_mask = ops.extend.one_hot(
+            cost_argmin, n_gt_max
         ).transpose(
             0, 2, 1
         )  # (bs, gt_max, nl*5*na*gt_max)

@@ -3,6 +3,7 @@ import os
 import time
 import types
 from typing import Union, List
+import numpy as np
 
 import mindspore as ms
 from mindspore import Tensor, nn, ops
@@ -164,7 +165,8 @@ class Trainer:
                     dtype = self.optimizer.momentum.dtype
                     self.optimizer.momentum = Tensor(warmup_momentum[i], dtype)
 
-            imgs, labels = data["images"], data["labels"]
+            # imgs, labels = data["images"], data["labels"]
+            imgs, labels = Tensor(np.load(r"./yolov7_ckpt_data/images.npy")[:16, :, :]), Tensor(np.load(r"./yolov7_ckpt_data/labels.npy")[:16, :, :])
             segments = None if 'masks' not in data else data["masks"]
             self._on_train_step_begin(run_context)
             run_context.loss, run_context.lr = self.train_step(imgs, labels, segments,
@@ -196,8 +198,8 @@ class Trainer:
 
                 if enable_modelarts:
                     sync_data(save_path, train_url + "/weights/" + save_path.split("/")[-1])
-                    if self.ema:
-                        sync_data(save_path_ema, train_url + "/weights/" + save_path_ema.split("/")[-1])
+                    # if self.ema:
+                    #     sync_data(save_path_ema, train_url + "/weights/" + save_path_ema.split("/")[-1])
 
                 logger.info(f"Epoch {cur_epoch}/{epochs}, epoch time: {(time.time() - s_epoch_time) / 60:.2f} min.")
                 s_step_time = time.time()

@@ -254,7 +254,6 @@ def train(args):
         test_fn = None
 
     # Create Trainer
-    network = amp.auto_mixed_precision(network, amp_level="O3")
     network.set_train(True)
     optimizer.set_train(True)
     model_name = os.path.basename(args.config)[:-5]  # delete ".yaml"

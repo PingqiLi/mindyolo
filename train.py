@@ -90,6 +90,7 @@ def get_parser_train(parents=None):
 def train(args):
     # Set Default
     context.set_context(pynative_synchronize=True)
+    profiler = ms.Profiler(output_path="./mem_info", profile_memory=True)
     set_seed(args.seed)
     set_default(args)
     main_device = args.rank % args.rank_size == 0

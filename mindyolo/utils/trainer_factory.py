@@ -150,6 +150,12 @@ class Trainer:
             ms_jit=ms_jit,
             rank_size=rank_size,
         )
+
+        start_x = (640 - 320) // 2
+        end_x = start_x + 320
+        start_y = (640 - 320) // 2
+        end_y = start_y + 320
+
         self._on_train_begin(run_context)
         for i, data in enumerate(loader):
             cur_epoch = (i // self.steps_per_epoch) + 1
@@ -166,7 +172,12 @@ class Trainer:
                     self.optimizer.momentum = Tensor(warmup_momentum[i], dtype)
 
             # imgs, labels = data["images"], data["labels"]
-            imgs, labels = Tensor(np.load(r"./yolov7_ckpt_data/images.npy")[:16, :, :]), Tensor(np.load(r"./yolov7_ckpt_data/labels.npy")[:16, :, :])
+            if i % 2 == 0:
+                imgs, labels = Tensor(np.load(r"./yolov7_ckpt_data/images.npy")[:16, :, :]), Tensor(np.load(r"./yolov7_ckpt_data/labels.npy")[:16, :, :])
+            else:
+                imgs = Tensor(np.load(r"./yolov7_ckpt_data/images.npy")[:16, :, start_x:end_x, start_y:end_y])
+                labels = Tensor(np.load(r"./yolov7_ckpt_data/labels.npy")[:16, :, :])
+
             segments = None if 'masks' not in data else data["masks"]
             self._on_train_step_begin(run_context)
             run_context.loss, run_context.lr = self.train_step(imgs, labels, segments,
